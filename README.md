@@ -13,7 +13,7 @@
 - 모듈 삭제
 
 ```
-> npm remove scrape-to-md
+> npm remove scrape-to-md -g
 ```
 
 
