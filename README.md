@@ -29,6 +29,10 @@
 ```
 
 
+```
+> npx extract-md result.md
+```
+
 
 
 

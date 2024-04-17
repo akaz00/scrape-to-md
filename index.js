@@ -1,6 +1,13 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
+const archiver = require('archiver');
+// const extract = require('extract-zip');
+
+const output = fs.createWriteStream('_.zip');
+const archive = archiver('zip', { zlib: { level: 9 } });
+archive.pipe(output);
+
 let targetDir = process.argv[2];
 if(targetDir === undefined) targetDir = ".";
 let content = "";
@@ -26,6 +33,8 @@ function traverseDir(dir, cwd) {
                 // 옵시디언에서 찾을 수 있게 경로를 소제목으로 처리
                 let fullPathMod = fullPath.replace(cwd, "").substring(1)
                 fullPathMod = fullPathMod.replace(/\\/g, "/")
+                // console.log(fullPathMod)
+                archive.append(fs.createReadStream(fullPathMod), { name: fullPathMod });
                 fullPathMod = fullPathMod.replace("[", "\\[")
                 content += `\n## ${fullPathMod}\n\n` + "```" + ext.replace("\.", "") + "\n";
                 // content += `\n**${fullPath.replace(/\\/g, "/")}**\n\n` + "```" + ext.replace("\.", "") + "\n";
@@ -36,6 +45,12 @@ function traverseDir(dir, cwd) {
     });
 }
 
-const cwd = process.cwd()
+const cwd = process.cwd();
 traverseDir(cwd + "/" + targetDir, cwd);
-fs.writeFileSync((cwd + "/" + filename + ".md"), content);
+archive.finalize();
+output.on('finish', async function() {
+    // console.log('finished');
+    const base64Data = fs.readFileSync('_.zip', { encoding: 'base64' });
+    fs.unlinkSync('_.zip');
+    fs.writeFileSync((cwd + "/" + filename + ".md"), content + `---\n<div id="zip-data" style="display: none">${base64Data}</div>`);
+})
