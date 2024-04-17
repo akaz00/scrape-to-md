@@ -28,11 +28,3 @@
 > npx scrape-to-md src
 ```
 
-
-```
-> npx extract-md result.md
-```
-
-
-
-
